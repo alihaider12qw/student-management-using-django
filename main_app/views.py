@@ -12,6 +12,73 @@ from .models import Attendance, Session, Subject
 # Create your views here.
 
 
+@csrf_exempt
+def login_api(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "Please use POST method to log in"}, status=500)
+    else:
+        # Authenticate
+        req_body = json.loads(request.body)
+        email = req_body.get("email")
+        password = req_body.get("password")
+
+        user = EmailBackend.authenticate(
+            request,
+            username=email,
+            password=password,
+        )
+        if user != None:
+            login(request, user)
+            if user.user_type == "1":
+                return JsonResponse(
+                    {
+                        "status": "success",
+                        "user_type": user.USER_TYPE[int(user.user_type) - 1][1],
+                        "email": user.email,
+                        "gender": user.gender,
+                        "profile_pic": (
+                            user.profile_pic.path if user.profile_pic else None
+                        ),
+                        "address": user.address,
+                        "created_at": user.created_at,
+                    },
+                    status=200,
+                )
+            elif user.user_type == "2":
+                return JsonResponse(
+                    {
+                        "status": "success",
+                        "user_type": user.USER_TYPE[int(user.user_type) - 1][1],
+                        "email": user.email,
+                        "gender": user.gender,
+                        "profile_pic": (
+                            user.profile_pic.path if user.profile_pic else None
+                        ),
+                        "address": user.address,
+                        "created_at": user.created_at,
+                    },
+                    status=200,
+                )
+            else:
+                return JsonResponse(
+                    {
+                        "status": "success",
+                        "user_type": user.USER_TYPE[int(user.user_type) - 1][1],
+                        "email": user.email,
+                        "gender": user.gender,
+                        "profile_pic": (
+                            user.profile_pic.path if user.profile_pic else None
+                        ),
+                        "address": user.address,
+                        "created_at": user.created_at,
+                    },
+                    status=200,
+                )
+        else:
+            messages.error(request, "Invalid details")
+            return JsonResponse({"status": "Invalid details"}, status=500)
+
+
 def login_page(request):
     if request.user.is_authenticated:
         if request.user.user_type == "1":
